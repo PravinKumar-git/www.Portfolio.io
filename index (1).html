@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pravin Kumar — UI/UX &amp; Digital Designer</title>
+<meta name="description" content="Pravin Kumar is a UI/UX and digital designer with an engineering background, focused on thoughtful interfaces and digital products.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --ink:#0a0a0a;
+  --paper:#f5f5f2;
+  --paper-dim:#ecebe6;
+  --gray:#8a8a83;
+  --gray-line: rgba(10,10,10,0.12);
+  --accent:#2c3bff;
+  --ink-invert:#f5f5f2;
+
+  --display: 'Archivo', sans-serif;
+  --body: 'Inter', sans-serif;
+
+  --ease: cubic-bezier(.16,.8,.24,1);
+  --ease-fast: cubic-bezier(.4,0,.2,1);
+
+  --gutter: clamp(20px, 4vw, 56px);
+  --nav-h: 84px;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
+}
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+button{ font-family:inherit; cursor:pointer; background:none; border:none; color:inherit; }
+ul{ list-style:none; margin:0; padding:0; }
+h1,h2,h3,h4,p{ margin:0; }
+
+::selection{ background:var(--ink); color:var(--paper); }
+
+.wrap{
+  width:100%;
+  max-width:1680px;
+  margin:0 auto;
+  padding-left:var(--gutter);
+  padding-right:var(--gutter);
+}
+
+/* visually-hidden util */
+.vh{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+/* focus visibility */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:4px;
+}
+
+/* ============================================================
+   CUSTOM CURSOR (desktop / fine pointer only)
+   ============================================================ */
+.cursor-dot, .cursor-ring{
+  position:fixed; top:0; left:0; pointer-events:none; z-index:9999;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  will-change:transform;
+}
+.cursor-dot{ width:6px; height:6px; background:var(--ink); }
+.cursor-ring{
+  width:36px; height:36px; border:1px solid var(--ink);
+  transition:width .25s var(--ease-fast), height .25s var(--ease-fast), border-color .25s var(--ease-fast), background .25s var(--ease-fast), opacity .25s;
+}
+.cursor-ring.is-view{ width:96px; height:96px; background:var(--ink); border-color:var(--ink); }
+.cursor-label{
+  position:fixed; top:0; left:0; transform:translate(-50%,-50%);
+  color:var(--paper); font-family:var(--display); font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  pointer-events:none; z-index:10000; opacity:0; transition:opacity .2s; white-space:nowrap;
+}
+.cursor-label.show{ opacity:1; }
+@media (hover:none), (pointer:coarse){
+  .cursor-dot, .cursor-ring, .cursor-label{ display:none; }
+}
+/* replace the native pointer with the custom cursor, fine-pointer devices only */
+@media (hover:hover) and (pointer:fine){
+  body, a, button, input, textarea, .project, .skill{ cursor:none; }
+}
+
+/* ============================================================
+   PRELOADER
+   ============================================================ */
+.preloader{
+  position:fixed; inset:0; background:var(--ink); z-index:10001;
+  display:flex; align-items:flex-end; justify-content:space-between;
+  padding:var(--gutter);
+  transition:transform .9s var(--ease);
+}
+.preloader.done{ transform:translateY(-100%); }
+.preloader__mark{ font-family:var(--display); font-weight:600; color:var(--paper); font-size:14px; letter-spacing:.02em; }
+.preloader__count{ font-family:var(--display); font-weight:600; color:var(--paper); font-size:14px; font-variant-numeric:tabular-nums; }
+.preloader__bar{
+  position:absolute; left:var(--gutter); right:var(--gutter); top:50%;
+  height:1px; background:rgba(245,245,242,0.2);
+}
+.preloader__bar i{
+  display:block; height:100%; width:0%; background:var(--paper);
+  transition:width .1s linear;
+}
+body.is-loading{ overflow:hidden; height:100vh; }
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav{
+  position:fixed; top:0; left:0; right:0; z-index:500;
+  height:var(--nav-h);
+  display:flex; align-items:center;
+  transition:height .4s var(--ease), background .4s var(--ease), border-color .4s var(--ease);
+  border-bottom:1px solid transparent;
+}
+.nav.scrolled{
+  height:64px;
+  background:rgba(245,245,242,0.86);
+  backdrop-filter:blur(10px);
+  border-bottom-color:var(--gray-line);
+}
+.nav__inner{
+  width:100%; max-width:1680px; margin:0 auto;
+  padding:0 var(--gutter);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.nav__logo{
+  font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:.01em;
+}
+.nav__links{
+  display:flex; align-items:center; gap:40px;
+}
+.nav__links a{
+  position:relative; font-size:14px; font-weight:500;
+  padding:4px 0;
+}
+.nav__links a::after{
+  content:''; position:absolute; left:0; right:100%; bottom:0; height:1px; background:var(--ink);
+  transition:right .3s var(--ease-fast);
+}
+.nav__links a:hover::after{ right:0; }
+.nav__cta{
+  border:1px solid var(--ink); padding:10px 20px; border-radius:100px;
+  font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:8px;
+  transition:background .25s var(--ease-fast), color .25s var(--ease-fast);
+}
+.nav__cta:hover{ background:var(--ink); color:var(--paper); }
+.nav__right{ display:flex; align-items:center; gap:28px; }
+.nav__burger{ display:none; width:28px; height:16px; position:relative; }
+.nav__burger span{
+  position:absolute; left:0; right:0; height:1.5px; background:var(--ink);
+  transition:transform .3s var(--ease-fast), opacity .3s var(--ease-fast), top .3s var(--ease-fast);
+}
+.nav__burger span:nth-child(1){ top:0; }
+.nav__burger span:nth-child(2){ top:7px; }
+.nav__burger span:nth-child(3){ top:14px; }
+.nav__burger.open span:nth-child(1){ top:7px; transform:rotate(45deg); }
+.nav__burger.open span:nth-child(2){ opacity:0; }
+.nav__burger.open span:nth-child(3){ top:7px; transform:rotate(-45deg); }
+
+.mobile-menu{
+  position:fixed; inset:0; background:var(--ink); z-index:450;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:var(--gutter);
+  transform:translateY(-100%);
+  transition:transform .5s var(--ease);
+}
+.mobile-menu.open{ transform:translateY(0); }
+.mobile-menu a{
+  font-family:var(--display); font-weight:600; font-size:clamp(32px,10vw,56px);
+  color:var(--paper); padding:14px 0; border-bottom:1px solid rgba(245,245,242,0.15);
+}
+.mobile-menu__foot{ margin-top:40px; color:rgba(245,245,242,0.5); font-size:13px; }
+
+@media (max-width:900px){
+  .nav__links, .nav__cta.desktop-only{ display:none; }
+  .nav__burger{ display:block; }
+}
+
+/* ============================================================
+   SECTION SCAFFOLD
+   ============================================================ */
+section{ position:relative; }
+.section-pad{ padding:clamp(80px,10vw,160px) 0; }
+.divider{ border-top:1px solid var(--gray-line); }
+
+.label-row{
+  display:flex; align-items:center; gap:14px; margin-bottom:clamp(28px,4vw,56px);
+}
+.label-num{
+  font-family:var(--display); font-weight:600; font-size:13px; letter-spacing:.08em;
+}
+.label-line{ flex:1; height:1px; background:var(--gray-line); }
+.label-text{
+  font-family:var(--display); font-weight:600; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--gray);
+}
+
+/* reveal system */
+.reveal{ opacity:0; transform:translateY(28px); transition:opacity .9s var(--ease), transform .9s var(--ease); }
+.reveal.in{ opacity:1; transform:translateY(0); }
+.reveal-mask{ overflow:hidden; }
+.reveal-mask > *{
+  transform:translateY(110%); transition:transform .9s var(--ease);
+}
+.reveal-mask.in > *{ transform:translateY(0); }
+.stagger > *{ transition-delay: calc(var(--i,0) * 70ms); }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{
+  min-height:100svh;
+  display:flex; flex-direction:column; justify-content:center;
+  padding-top:calc(var(--nav-h) + 24px);
+  padding-bottom:40px;
+  position:relative;
+}
+.hero__eyebrow{
+  font-family:var(--display); font-weight:600; font-size:clamp(11px,1.1vw,13px);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--gray);
+  margin-bottom:28px;
+}
+.hero__title{
+  font-family:var(--display); font-weight:700;
+  font-size:clamp(44px, 8.4vw, 132px);
+  line-height:.98; letter-spacing:-.02em;
+  max-width:20ch;
+}
+.hero__title em{
+  font-style:normal; color:var(--accent);
+}
+.hero__row{
+  display:flex; justify-content:space-between; align-items:flex-end; gap:40px;
+  margin-top:clamp(32px,5vw,64px);
+  flex-wrap:wrap;
+}
+.hero__sub{
+  max-width:420px; font-size:clamp(16px,1.6vw,19px); color:#333; line-height:1.55;
+}
+.hero__ctas{ display:flex; gap:16px; flex-wrap:wrap; }
+.btn{
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--display); font-weight:600; font-size:14px;
+  padding:16px 26px; border-radius:100px;
+  transition:transform .3s var(--ease-fast);
+}
+.btn-solid{ background:var(--ink); color:var(--paper); }
+.btn-outline{ border:1px solid var(--ink); }
+.btn:hover{ transform:translateY(-2px); }
+.btn .arrow{ transition:transform .3s var(--ease-fast); }
+.btn:hover .arrow{ transform:translate(3px,-2px); }
+
+.magnetic{ will-change:transform; }
+
+.hero__visual{
+  position:absolute; right:var(--gutter); bottom:20px;
+  width:min(360px, 34vw); aspect-ratio:1;
+  pointer-events:none;
+  opacity:.9;
+  will-change:transform;
+}
+@media (max-width:900px){ .hero__visual{ display:none; } }
+
+/* ============================================================
+   MARQUEE
+   ============================================================ */
+.marquee-wrap{
+  border-top:1px solid var(--gray-line); border-bottom:1px solid var(--gray-line);
+  overflow:hidden; padding:22px 0;
+}
+.marquee-track{
+  display:flex; width:max-content;
+  animation:marquee 34s linear infinite;
+}
+.marquee-track span{
+  font-family:var(--display); font-weight:600;
+  font-size:clamp(22px,3.4vw,40px);
+  letter-spacing:-.01em;
+  padding:0 22px;
+  white-space:nowrap;
+  color:var(--ink);
+  display:flex; align-items:center; gap:22px;
+}
+.marquee-track span i{
+  font-style:normal; width:9px; height:9px; border-radius:50%; background:var(--accent); display:inline-block;
+}
+@keyframes marquee{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
+.marquee-wrap:hover .marquee-track{ animation-play-state:paused; }
+
+/* ============================================================
+   ABOUT INTRO (01)
+   ============================================================ */
+.intro__grid{
+  display:grid; grid-template-columns:1fr;
+  gap:32px;
+}
+.intro__statement{
+  font-family:var(--display); font-weight:600;
+  font-size:clamp(28px,4.6vw,58px); line-height:1.08; letter-spacing:-.01em;
+  max-width:16ch;
+}
+.intro__body{
+  margin-top:clamp(28px,5vw,48px);
+  display:flex; justify-content:flex-end;
+}
+.intro__body-inner{
+  max-width:480px; text-align:left;
+}
+.intro__body-inner p{
+  font-size:17px; color:#3a3a38; line-height:1.7;
+}
+.intro__link{
+  display:inline-flex; align-items:center; gap:8px; margin-top:20px;
+  font-weight:600; font-size:14px; border-bottom:1px solid var(--ink); padding-bottom:2px;
+}
+
+/* ============================================================
+   WORK (02)
+   ============================================================ */
+.work-heading{
+  font-family:var(--display); font-weight:600;
+  font-size:clamp(26px,3.6vw,46px); line-height:1.1; letter-spacing:-.01em;
+  max-width:18ch; margin-bottom:clamp(40px,6vw,88px);
+}
+.project{
+  border-top:1px solid var(--gray-line);
+  padding:clamp(28px,4vw,48px) 0;
+  cursor:pointer;
+  position:relative;
+}
+.project:last-child{ border-bottom:1px solid var(--gray-line); }
+.project__top{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:24px;
+}
+.project__meta{ display:flex; align-items:baseline; gap:18px; }
+.project__index{ font-family:var(--display); font-weight:600; font-size:14px; color:var(--gray); }
+.project__title{
+  font-family:var(--display); font-weight:600;
+  font-size:clamp(24px,3.4vw,44px); letter-spacing:-.01em;
+  transition:transform .4s var(--ease-fast);
+}
+.project__cat{ font-size:13px; color:var(--gray); margin-top:8px; }
+.project__year{ font-family:var(--display); font-weight:600; font-size:14px; color:var(--gray); flex-shrink:0; }
+.project__desc{
+  max-width:440px; font-size:15px; color:#3a3a38; margin-top:14px; line-height:1.6;
+}
+.project__visual{
+  height:0; overflow:hidden; border-radius:14px;
+  transition:height .55s var(--ease), margin .55s var(--ease);
+  margin-top:0;
+}
+.project:hover .project__visual{ height:clamp(260px,32vw,460px); margin-top:28px; }
+.project:hover .project__title{ transform:translateX(10px); }
+.project__visual-inner{
+  width:100%; height:100%; position:relative;
+  transform:scale(1.08); transition:transform .7s var(--ease);
+}
+.project:hover .project__visual-inner{ transform:scale(1); }
+.project__cta{
+  display:inline-flex; align-items:center; gap:8px; margin-top:16px;
+  font-weight:600; font-size:14px;
+}
+.project__cta .arrow{ transition:transform .3s var(--ease-fast); }
+.project:hover .project__cta .arrow{ transform:translate(3px,-3px); }
+
+/* generated abstract project art */
+.art{ width:100%; height:100%; background:var(--paper-dim); position:relative; overflow:hidden; }
+.art svg{ width:100%; height:100%; display:block; }
+
+/* ============================================================
+   CASE STUDY OVERLAY
+   ============================================================ */
+.case{
+  position:fixed; inset:0; background:var(--paper); z-index:800;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+  transform:translateY(100%);
+  transition:transform .6s var(--ease);
+}
+.case.open{ transform:translateY(0); }
+body.case-open{ overflow:hidden; }
+.case__bar{
+  position:sticky; top:0; z-index:5; background:rgba(245,245,242,0.9); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--gray-line);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px var(--gutter);
+}
+.case__close{
+  display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:13px;
+}
+.case__nav{ display:flex; gap:22px; overflow-x:auto; }
+.case__nav a{ font-size:12px; color:var(--gray); white-space:nowrap; transition:color .2s; }
+.case__nav a.active{ color:var(--ink); }
+@media (max-width:900px){ .case__nav{ display:none; } }
+
+.case__hero{ padding:clamp(50px,9vw,110px) 0 clamp(30px,5vw,60px); }
+.case__eyebrow{ font-size:13px; color:var(--gray); margin-bottom:18px; }
+.case__title{ font-family:var(--display); font-weight:700; font-size:clamp(36px,7vw,92px); letter-spacing:-.02em; line-height:1; max-width:16ch; }
+.case__tags{ display:flex; gap:10px; margin-top:26px; flex-wrap:wrap; }
+.case__tag{ font-size:12px; border:1px solid var(--gray-line); padding:7px 14px; border-radius:100px; color:#333; }
+.case__cover{ margin:clamp(30px,5vw,60px) 0; border-radius:16px; overflow:hidden; height:clamp(280px,46vw,600px); }
+.case__block{ padding:clamp(40px,6vw,80px) 0; border-top:1px solid var(--gray-line); }
+.case__block-grid{ display:grid; grid-template-columns:120px 1fr; gap:40px; }
+@media (max-width:760px){ .case__block-grid{ grid-template-columns:1fr; gap:16px; } }
+.case__block-num{ font-family:var(--display); font-weight:600; font-size:14px; color:var(--gray); }
+.case__block h3{ font-family:var(--display); font-weight:600; font-size:clamp(22px,2.6vw,32px); letter-spacing:-.01em; margin-bottom:16px; max-width:20ch; }
+.case__block p{ max-width:640px; font-size:16px; color:#3a3a38; line-height:1.7; }
+.case__block p + p{ margin-top:14px; }
+.case__shot{ margin-top:28px; border-radius:12px; overflow:hidden; height:clamp(220px,32vw,420px); }
+.case__foot{ padding:clamp(50px,8vw,100px) 0; text-align:center; }
+.case__foot a{ font-family:var(--display); font-weight:600; font-size:clamp(24px,4vw,40px); display:inline-flex; align-items:center; gap:14px; }
+
+/* ============================================================
+   PROCESS (03)
+   ============================================================ */
+.process-heading{ font-family:var(--display); font-weight:600; font-size:clamp(26px,4vw,52px); letter-spacing:-.01em; max-width:16ch; margin-bottom:clamp(40px,6vw,80px); }
+.process-list{ }
+.pstep{
+  border-top:1px solid var(--gray-line);
+  padding:26px 0;
+  display:grid; grid-template-columns:70px 1fr 26px;
+  align-items:start; gap:20px;
+  cursor:pointer;
+}
+.process-list .pstep:last-child{ border-bottom:1px solid var(--gray-line); }
+.pstep__num{ font-family:var(--display); font-weight:600; font-size:14px; color:var(--gray); padding-top:6px; }
+.pstep__title{ font-family:var(--display); font-weight:600; font-size:clamp(22px,3vw,36px); letter-spacing:-.01em; }
+.pstep__plus{
+  width:26px; height:26px; position:relative; flex-shrink:0; margin-top:8px;
+}
+.pstep__plus::before, .pstep__plus::after{
+  content:''; position:absolute; background:var(--ink); transition:transform .3s var(--ease-fast);
+}
+.pstep__plus::before{ left:0; right:0; top:50%; height:1.5px; transform:translateY(-50%); }
+.pstep__plus::after{ top:0; bottom:0; left:50%; width:1.5px; transform:translateX(-50%); }
+.pstep.open .pstep__plus::after{ transform:translateX(-50%) rotate(90deg); opacity:0; }
+.pstep__detail{
+  grid-column:2/3; max-width:520px; overflow:hidden; height:0;
+  transition:height .4s var(--ease);
+}
+.pstep__detail p{ font-size:15px; color:#3a3a38; line-height:1.65; padding-top:14px; }
+
+/* ============================================================
+   SKILLS (04)
+   ============================================================ */
+.skills-heading{ font-family:var(--display); font-weight:600; font-size:clamp(26px,4vw,52px); letter-spacing:-.01em; max-width:16ch; margin-bottom:clamp(36px,5vw,64px); }
+.skills-grid{
+  display:flex; flex-wrap:wrap; gap:0;
+  border-top:1px solid var(--gray-line); border-left:1px solid var(--gray-line);
+}
+.skill{
+  flex:1 1 260px;
+  border-right:1px solid var(--gray-line); border-bottom:1px solid var(--gray-line);
+  padding:22px 24px;
+  font-family:var(--display); font-weight:600; font-size:clamp(16px,1.8vw,20px);
+  position:relative; overflow:hidden;
+  transition:color .3s;
+}
+.skill span{ position:relative; z-index:1; }
+.skill small{ display:block; font-family:var(--body); font-weight:400; font-size:12px; color:var(--gray); margin-top:6px; }
+.skill::before{
+  content:''; position:absolute; inset:0; background:var(--ink);
+  transform:translateY(101%); transition:transform .35s var(--ease-fast);
+}
+.skill:hover{ color:var(--paper); }
+.skill:hover small{ color:rgba(245,245,242,0.6); }
+.skill:hover::before{ transform:translateY(0); }
+
+/* ============================================================
+   ABOUT (deep)
+   ============================================================ */
+.about-grid{ display:grid; grid-template-columns:1fr; gap:48px; }
+@media (min-width:900px){ .about-grid{ grid-template-columns: 0.9fr 1.1fr; gap:80px; } }
+.about-portrait{
+  aspect-ratio:4/5; border-radius:18px; overflow:hidden; background:var(--paper-dim);
+  position:relative;
+}
+.about-heading{ font-family:var(--display); font-weight:600; font-size:clamp(28px,4.2vw,52px); letter-spacing:-.01em; line-height:1.08; max-width:14ch; }
+.about-copy{ margin-top:24px; font-size:16px; color:#3a3a38; line-height:1.75; max-width:52ch; }
+.about-copy p + p{ margin-top:14px; }
+.about-traits{ display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; }
+.about-traits span{ font-size:12px; border:1px solid var(--gray-line); padding:8px 14px; border-radius:100px; color:#333; }
+.about-cta{ margin-top:32px; }
+
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+.timeline{ margin-top:clamp(40px,6vw,80px); }
+.tline{
+  display:grid; grid-template-columns:90px 1fr; gap:20px;
+  padding:22px 0; border-top:1px solid var(--gray-line);
+  align-items:baseline;
+}
+.timeline .tline:last-child{ border-bottom:1px solid var(--gray-line); }
+.tline__year{ font-family:var(--display); font-weight:700; font-size:16px; }
+.tline__text{ font-size:15px; color:#3a3a38; }
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+.contact{ background:var(--ink); color:var(--paper); }
+.contact .label-text{ color:rgba(245,245,242,0.5); }
+.contact .label-line{ background:rgba(245,245,242,0.18); }
+.contact-heading{
+  font-family:var(--display); font-weight:700; font-size:clamp(34px,7vw,96px); letter-spacing:-.02em; line-height:1.02; max-width:16ch;
+}
+.contact-sub{ max-width:520px; margin-top:24px; font-size:17px; color:rgba(245,245,242,0.7); line-height:1.6; }
+.contact-email{
+  display:inline-flex; align-items:center; gap:16px; margin-top:clamp(40px,6vw,70px);
+  font-family:var(--display); font-weight:700; font-size:clamp(24px,5vw,54px);
+  border-bottom:1px solid rgba(245,245,242,0.3); padding-bottom:12px;
+}
+.contact-email .arrow{ transition:transform .3s var(--ease-fast); }
+.contact-email:hover .arrow{ transform:translate(6px,-6px); }
+.contact-email:hover{ border-color:var(--paper); }
+
+.contact-cols{ display:grid; grid-template-columns:1fr; gap:56px; margin-top:clamp(60px,8vw,110px); }
+@media (min-width:900px){ .contact-cols{ grid-template-columns:1fr 1fr; } }
+
+.social-list a{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:16px 0; border-top:1px solid rgba(245,245,242,0.15); font-size:15px;
+}
+.social-list a:last-child{ border-bottom:1px solid rgba(245,245,242,0.15); }
+.social-list .arrow{ opacity:.5; transition:transform .3s var(--ease-fast), opacity .3s; }
+.social-list a:hover .arrow{ transform:translate(4px,-4px); opacity:1; }
+
+.form-field{ margin-bottom:22px; }
+.form-field label{ display:block; font-size:12px; color:rgba(245,245,242,0.5); margin-bottom:8px; }
+.form-field input, .form-field textarea{
+  width:100%; background:transparent; border:none; border-bottom:1px solid rgba(245,245,242,0.25);
+  color:var(--paper); font-family:var(--body); font-size:16px; padding:10px 0; resize:none;
+  transition:border-color .25s;
+}
+.form-field input:focus, .form-field textarea:focus{ border-color:var(--paper); outline:none; }
+.form-submit{
+  display:inline-flex; align-items:center; gap:10px; margin-top:6px;
+  border:1px solid var(--paper); border-radius:100px; padding:15px 26px;
+  font-family:var(--display); font-weight:600; font-size:14px;
+  transition:background .25s, color .25s;
+}
+.form-submit:hover{ background:var(--paper); color:var(--ink); }
+.form-note{ font-size:12px; color:rgba(245,245,242,0.45); margin-top:14px; }
+.form-success{ font-size:14px; color:var(--paper); margin-top:14px; display:none; }
+.form-success.show{ display:block; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer{ background:var(--ink); color:rgba(245,245,242,0.6); }
+.footer__inner{
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;
+  padding:28px 0; border-top:1px solid rgba(245,245,242,0.15);
+  font-size:13px;
+}
+.footer__mark{ font-family:var(--display); font-weight:700; color:var(--paper); font-size:15px; }
+.footer__top{ display:inline-flex; align-items:center; gap:8px; }
+
+/* misc */
+.hairline{ border-top:1px solid var(--gray-line); }
+</style>
+</head>
+<body class="is-loading">
+
+<!-- PRELOADER -->
+<div class="preloader" id="preloader">
+  <div class="preloader__mark">PRAVIN KUMAR</div>
+  <div class="preloader__bar"><i id="preloaderBar"></i></div>
+  <div class="preloader__count" id="preloaderCount">0%</div>
+</div>
+
+<!-- CUSTOM CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<span class="cursor-label" id="cursorLabel">View</span>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="#top" class="nav__logo">PRAVIN KUMAR</a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="nav__right">
+      <a href="#contact" class="nav__cta desktop-only magnetic">Let's talk <span class="arrow">↗</span></a>
+      <button class="nav__burger" id="burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#work">Work</a>
+  <a href="#about">About</a>
+  <a href="#skills">Skills</a>
+  <a href="#contact">Contact</a>
+  <div class="mobile-menu__foot">pravinshanmugam27@gmail.com</div>
+</div>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero wrap">
+    <p class="hero__eyebrow reveal">UI/UX Designer · Digital Designer · Creative Developer</p>
+    <div class="reveal-mask">
+      <h1 class="hero__title">I design digital experiences that make complex things <em>feel simple.</em></h1>
+    </div>
+    <div class="hero__row">
+      <p class="hero__sub reveal">I'm Pravin — a designer focused on creating thoughtful interfaces, digital products and memorable web experiences.</p>
+      <div class="hero__ctas reveal">
+        <a href="#work" class="btn btn-solid magnetic">View my work <span class="arrow">↘</span></a>
+        <a href="#contact" class="btn btn-outline magnetic">Let's connect <span class="arrow">↗</span></a>
+      </div>
+    </div>
+    <div class="hero__visual" id="heroVisual" aria-hidden="true"></div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-track" id="marqueeTrack">
+      <span>UI/UX Design <i></i> Web Design <i></i> Product Design <i></i> Interaction <i></i> Design Systems <i></i> Digital Experiences <i></i></span>
+      <span>UI/UX Design <i></i> Web Design <i></i> Product Design <i></i> Interaction <i></i> Design Systems <i></i> Digital Experiences <i></i></span>
+    </div>
+  </div>
+
+  <!-- INTRO / ABOUT SUMMARY -->
+  <section class="section-pad wrap" id="intro">
+    <div class="label-row reveal">
+      <span class="label-num">01</span>
+      <span class="label-line"></span>
+      <span class="label-text">About me</span>
+    </div>
+    <div class="intro__grid">
+      <div class="reveal-mask">
+        <h2 class="intro__statement">I turn ideas into digital experiences people actually enjoy using.</h2>
+      </div>
+      <div class="intro__body">
+        <div class="intro__body-inner reveal">
+          <p>I'm an aspiring UI/UX and digital designer with a background in Electrical &amp; Electronics Engineering. That combination means I approach design with an analytical mind — I care as much about how an interface behaves under real constraints as I do about how it looks.</p>
+          <p>Over the past year I've moved from engineering into design, learning the craft through hands-on projects, self-study and constant iteration in Figma.</p>
+          <a href="#about" class="intro__link">More about me <span class="arrow">↗</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SELECTED WORK -->
+  <section class="section-pad wrap" id="work">
+    <div class="label-row reveal">
+      <span class="label-num">02</span>
+      <span class="label-line"></span>
+      <span class="label-text">Selected work</span>
+    </div>
+    <h2 class="work-heading reveal">A selection of things I've designed, explored and built.</h2>
+
+    <div id="projectList"></div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="section-pad wrap" id="process">
+    <div class="label-row reveal">
+      <span class="label-num">03</span>
+      <span class="label-line"></span>
+      <span class="label-text">Process</span>
+    </div>
+    <h2 class="process-heading reveal">Good design isn't decoration. It's problem solving.</h2>
+    <div class="process-list" id="processList"></div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="section-pad wrap" id="skills">
+    <div class="label-row reveal">
+      <span class="label-num">04</span>
+      <span class="label-line"></span>
+      <span class="label-text">Capabilities</span>
+    </div>
+    <h2 class="skills-heading reveal">Tools and disciplines I work with.</h2>
+    <div class="skills-grid" id="skillsGrid"></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section-pad wrap" id="about">
+    <div class="label-row reveal">
+      <span class="label-num">05</span>
+      <span class="label-line"></span>
+      <span class="label-text">About</span>
+    </div>
+    <div class="about-grid">
+      <div class="about-portrait reveal" id="aboutPortrait"></div>
+      <div>
+        <h2 class="about-heading reveal">Designer with an engineer's way of thinking.</h2>
+        <div class="about-copy reveal">
+          <p>I studied Electrical &amp; Electronics Engineering before finding my way into UI/UX and digital product design. That path gave me a habit of breaking problems down before I try to solve them — a mindset that carries directly into how I approach interfaces.</p>
+          <p>I'm drawn to the parts of design that reward precision: information hierarchy, interaction states, the small details that decide whether a product feels considered or just assembled. I'm still early in this shift, and genuinely curious to keep learning from people further along than I am.</p>
+        </div>
+        <div class="about-traits reveal">
+          <span>Analytical thinking</span>
+          <span>Problem solving</span>
+          <span>Visual design</span>
+          <span>Curiosity</span>
+          <span>Attention to detail</span>
+          <span>Continuous learning</span>
+        </div>
+        <div class="about-cta reveal">
+          <a href="resume.pdf" download class="btn btn-outline magnetic">Download résumé <span class="arrow">↗</span></a>
+        </div>
+
+        <div class="timeline">
+          <div class="tline reveal"><span class="tline__year">2024</span><span class="tline__text">Studying Electrical &amp; Electronics Engineering.</span></div>
+          <div class="tline reveal"><span class="tline__year">2025</span><span class="tline__text">Started exploring UI/UX design.</span></div>
+          <div class="tline reveal"><span class="tline__year">2025</span><span class="tline__text">Learned Figma and web design fundamentals.</span></div>
+          <div class="tline reveal"><span class="tline__year">2026</span><span class="tline__text">Building digital products and this portfolio.</span></div>
+          <div class="tline reveal"><span class="tline__year">2026</span><span class="tline__text">Open to design opportunities.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact section-pad" id="contact">
+    <div class="wrap">
+      <div class="label-row reveal">
+        <span class="label-num">06</span>
+        <span class="label-line"></span>
+        <span class="label-text">Contact</span>
+      </div>
+      <div class="reveal-mask">
+        <h2 class="contact-heading">Have an idea? Let's make something great.</h2>
+      </div>
+      <p class="contact-sub reveal">I'm currently open to design opportunities, collaborations, freelance projects and interesting digital products.</p>
+      <a href="mailto:pravinshanmugam27@gmail.com" class="contact-email reveal">pravinshanmugam27@gmail.com <span class="arrow">↗</span></a>
+
+      <div class="contact-cols">
+        <ul class="social-list reveal">
+          <li><a href="#" target="_blank" rel="noopener">LinkedIn <span class="arrow">↗</span></a></li>
+          <li><a href="#" target="_blank" rel="noopener">Behance <span class="arrow">↗</span></a></li>
+          <li><a href="#" target="_blank" rel="noopener">Dribbble <span class="arrow">↗</span></a></li>
+          <li><a href="#" target="_blank" rel="noopener">GitHub <span class="arrow">↗</span></a></li>
+          <li><a href="#" target="_blank" rel="noopener">Instagram <span class="arrow">↗</span></a></li>
+        </ul>
+
+        <form class="contact-form reveal" id="contactForm">
+          <div class="form-field">
+            <label for="cf-name">Name</label>
+            <input id="cf-name" name="name" type="text" required>
+          </div>
+          <div class="form-field">
+            <label for="cf-email">Email</label>
+            <input id="cf-email" name="email" type="email" required>
+          </div>
+          <div class="form-field">
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message" name="message" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="form-submit">Send message <span class="arrow">↗</span></button>
+          <p class="form-note">This form isn't wired to a backend yet — connect it to Formspree, EmailJS or your own endpoint before going live.</p>
+          <p class="form-success" id="formSuccess">Thanks — I'll get back to you shortly.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div>
+        <div class="footer__mark">PRAVIN KUMAR</div>
+        <div>UI/UX Designer · Digital Designer</div>
+      </div>
+      <div>© 2026 Pravin Kumar</div>
+      <a href="#top" class="footer__top">Back to top <span class="arrow">↑</span></a>
+    </div>
+  </footer>
+
+</main>
+
+<!-- CASE STUDY OVERLAY -->
+<div class="case" id="caseOverlay" role="dialog" aria-modal="true" aria-label="Project case study">
+  <div class="case__bar">
+    <button class="case__close" id="caseClose">← Close</button>
+    <nav class="case__nav" id="caseNav"></nav>
+  </div>
+  <div id="caseContent"></div>
+</div>
+
+<script>
+/* ============================================================
+   DATA — replace with real projects when ready
+   ============================================================ */
+const PROJECTS = [
+  {
+    id:'fintech',
+    index:'01',
+    year:'2026',
+    title:'Fintech Mobile Experience',
+    category:'UX/UI · Product Design',
+    desc:"Redesigning a complex financial experience into a clear and intuitive mobile product.",
+    accent:'#2c3bff',
+    art:'bars',
+    sections:{
+      overview:"A concept redesign exploring how a personal-finance app can present balances, spending and transfers without overwhelming a first-time user. The brief I set myself: reduce the number of decisions on screen at any one time.",
+      problem:"Most budgeting apps front-load every feature into the home screen — balances, charts, goals, offers — competing for the same glance. New users open the app once and don't come back.",
+      research:"I audited five widely used finance apps, mapped their information hierarchy, and interviewed a few peers about what they actually check first when they open a banking app. Balance and recent activity won, consistently.",
+      flow:"The core flow narrows to three screens: balance overview, transaction detail, and transfer. Every secondary feature is one tap deeper, never competing for the home screen.",
+      wireframes:"Low-fidelity wireframes focused on hierarchy first — type scale and spacing before any colour or iconography, so the structure had to work in grayscale.",
+      visual:"A restrained palette with a single accent colour reserved for actionable moments — send, confirm, alert — so it always means something when it appears.",
+      prototype:"Built as an interactive Figma prototype covering the balance, transaction detail and transfer flows, with realistic transition timing.",
+      outcome:"A working case study I use to demonstrate structured thinking around information hierarchy in high-density financial interfaces — the kind of screen most portfolios avoid because it's hard to simplify."
+    }
+  },
+  {
+    id:'saas',
+    index:'02',
+    year:'2025',
+    title:'Modern SaaS Dashboard',
+    category:'Product Design · UX/UI',
+    desc:"A dashboard concept for a project-analytics tool, built around fast scanning over decoration.",
+    accent:'#2c3bff',
+    art:'grid',
+    sections:{
+      overview:"A dashboard concept for a small-team analytics tool. The goal was a screen a manager could scan in under ten seconds and know whether anything needed their attention.",
+      problem:"Dashboard templates default to a wall of equally-weighted cards. Nothing is prioritised, so everything gets ignored.",
+      research:"I looked at how teams actually use dashboards day to day versus how they're designed — most people check two or three numbers and one chart, not the whole page.",
+      flow:"One primary metric anchors the top of the screen, secondary metrics sit in a consistent strip beneath it, and anomalies get a distinct visual treatment instead of another card.",
+      wireframes:"Grid-based wireframes exploring a 12-column layout, tested at three breakpoints to keep density under control on smaller screens.",
+      visual:"Data-forward visual design: minimal chrome, clear axis labelling, and colour used only to flag status, not to decorate.",
+      prototype:"An interactive Figma prototype with working filter states and a simulated data-refresh interaction.",
+      outcome:"A demonstration of dashboard design that prioritises legibility and hierarchy over visual noise."
+    }
+  },
+  {
+    id:'portfolio-site',
+    index:'03',
+    year:'2025',
+    title:'Creative Portfolio Concept',
+    category:'Web Design · Interaction',
+    desc:"An immersive, editorial website concept exploring scroll-based storytelling for a creative studio.",
+    accent:'#2c3bff',
+    art:'lines',
+    sections:{
+      overview:"A concept website for a fictional design studio, used to practice scroll-driven storytelling, type-led layout and interaction design outside of an app context.",
+      problem:"Most studio websites default to a generic template feel — the challenge was building something that felt considered without needing real client content.",
+      research:"I studied a handful of award-winning agency sites to understand pacing: how much motion is enough, and where restraint reads as confidence rather than lack of effort.",
+      flow:"A single-scroll narrative: hero statement, capability marquee, work, process, contact — each section earns its place rather than existing by default.",
+      wireframes:"Wireframed in low fidelity first to lock spacing and rhythm before introducing any type treatment or motion.",
+      visual:"High-contrast black-and-white system with one accent colour, oversized typography as the main visual device.",
+      prototype:"Built directly in code rather than only Figma, to test real scroll performance and interaction timing.",
+      outcome:"A working front-end exercise in editorial layout, motion restraint and typographic hierarchy."
+    }
+  },
+  {
+    id:'ecommerce',
+    index:'04',
+    year:'2025',
+    title:'E-Commerce Experience',
+    category:'UX/UI · Conversion Design',
+    desc:"Rethinking a product listing and checkout flow to reduce friction between browsing and buying.",
+    accent:'#2c3bff',
+    art:'squares',
+    sections:{
+      overview:"A concept redesign of a product listing and checkout flow for a mid-size online store, focused on reducing drop-off between add-to-cart and purchase.",
+      problem:"Long checkout flows and unclear shipping information are two of the most common reasons carts get abandoned — I wanted to test how far a simplified flow could go.",
+      research:"I reviewed public data on checkout abandonment causes and mapped a typical five-step checkout to find where steps could be merged or removed.",
+      flow:"Reduced the flow from five steps to three: cart review, shipping and payment combined, and confirmation — with shipping cost shown up front, not at the final step.",
+      wireframes:"Wireframed both the product listing grid and the checkout flow, paying particular attention to how filters behave on mobile.",
+      visual:"Clean product photography placeholders, generous white space, and a persistent order-summary panel during checkout.",
+      prototype:"Interactive prototype covering listing → cart → checkout → confirmation.",
+      outcome:"A structured exercise in conversion-focused UX, grounded in real abandonment research rather than assumption."
+    }
+  },
+  {
+    id:'ai-concept',
+    index:'05',
+    year:'2026',
+    title:'AI Product Concept',
+    category:'Product Design · AI',
+    desc:"A minimal interface concept for an AI writing assistant, designed around trust and transparency.",
+    accent:'#2c3bff',
+    art:'dots',
+    sections:{
+      overview:"A concept interface for an AI writing assistant, exploring how to design for a tool whose output isn't always predictable.",
+      problem:"Many AI product interfaces hide how a suggestion was generated, which makes it harder for a user to trust or verify the result.",
+      research:"I looked at how existing AI writing tools surface (or don't surface) their reasoning, and where users hesitate to accept a suggestion.",
+      flow:"A side-by-side flow: the user's draft on one side, suggestions with a visible short rationale on the other, so acceptance is a decision rather than a guess.",
+      wireframes:"Wireframed the core editor and suggestion panel first, keeping the AI output visually distinct from the user's own text at every stage.",
+      visual:"A calm, minimal interface — mostly black, white and grey — so the AI element doesn't compete visually with the writing itself.",
+      prototype:"A click-through Figma prototype simulating a suggestion-and-accept interaction.",
+      outcome:"An exploration of designing for trust and legibility in AI-assisted tools, rather than defaulting to a chat-window pattern."
+    }
+  }
+];
+
+const PROCESS_STEPS = [
+  {n:'01', t:'Discover', d:"Understanding the problem before touching a design tool — the brief, the constraints, and who the work is actually for."},
+  {n:'02', t:'Define', d:"Turning research into a clear problem statement and a small set of priorities the design has to satisfy."},
+  {n:'03', t:'Explore', d:"Sketching multiple directions quickly, in low fidelity, before committing to one approach."},
+  {n:'04', t:'Design', d:"Building the chosen direction out in detail — layout, type, hierarchy, and interaction states."},
+  {n:'05', t:'Prototype', d:"Making the design interactive enough to test how it actually feels to use, not just how it looks."},
+  {n:'06', t:'Refine', d:"Revisiting decisions against feedback and constraints, and cutting anything that doesn't earn its place."}
+];
+
+const SKILLS = [
+  {t:'UI/UX Design'},{t:'Product Design'},{t:'Web Design'},{t:'Interaction Design'},
+  {t:'Design Systems'},{t:'Wireframing'},{t:'Prototyping'},{t:'User Research'},
+  {t:'Visual Design'},{t:'Figma'},{t:'Webflow'},{t:'Framer'},
+  {t:'HTML / CSS'},{t:'Basic JavaScript'}
+];
+
+/* ============================================================
+   ABSTRACT PLACEHOLDER ART (SVG, generated — swap with real shots)
+   ============================================================ */
+function artSVG(type, accent){
+  const c = accent;
+  if(type==='bars'){
+    let bars='';
+    const h=[38,62,44,78,54,90,60];
+    h.forEach((v,i)=>{ bars += `<rect x="${20+i*40}" y="${260-v*2}" width="24" height="${v*2}" fill="${i===5?c:'#0a0a0a'}" opacity="${i===5?1:0.85}"/>`; });
+    return `<svg viewBox="0 0 320 280" preserveAspectRatio="xMidYMid slice">
+      <rect width="320" height="280" fill="#ecebe6"/>
+      <line x1="20" y1="260" x2="300" y2="260" stroke="#0a0a0a" stroke-opacity="0.2"/>
+      ${bars}
+      <circle cx="280" cy="40" r="5" fill="${c}"/>
+    </svg>`;
+  }
+  if(type==='grid'){
+    let cells='';
+    for(let i=0;i<6;i++){
+      for(let j=0;j<4;j++){
+        const on = (i+j)%5===0;
+        cells += `<rect x="${20+i*46}" y="${20+j*56}" width="38" height="46" fill="${on?c:'#0a0a0a'}" opacity="${on?1:0.06+((i*j)%3)*0.05}"/>`;
+      }
+    }
+    return `<svg viewBox="0 0 320 280" preserveAspectRatio="xMidYMid slice">
+      <rect width="320" height="280" fill="#ecebe6"/>${cells}</svg>`;
+  }
+  if(type==='lines'){
+    let lines='';
+    for(let i=0;i<9;i++){
+      lines += `<line x1="0" y1="${20+i*28}" x2="320" y2="${20+i*28-40+((i%3)*20)}" stroke="#0a0a0a" stroke-opacity="${i===4?1:0.14}" stroke-width="${i===4?2:1}"/>`;
+    }
+    return `<svg viewBox="0 0 320 280" preserveAspectRatio="xMidYMid slice">
+      <rect width="320" height="280" fill="#ecebe6"/>${lines}
+      <circle cx="230" cy="70" r="6" fill="${c}"/></svg>`;
+  }
+  if(type==='squares'){
+    return `<svg viewBox="0 0 320 280" preserveAspectRatio="xMidYMid slice">
+      <rect width="320" height="280" fill="#ecebe6"/>
+      <rect x="24" y="24" width="130" height="130" fill="#0a0a0a"/>
+      <rect x="166" y="24" width="130" height="60" fill="${c}"/>
+      <rect x="166" y="94" width="130" height="60" fill="#0a0a0a" opacity="0.12"/>
+      <rect x="24" y="166" width="272" height="90" fill="#0a0a0a" opacity="0.08"/>
+      <rect x="24" y="166" width="90" height="90" fill="#0a0a0a"/>
+    </svg>`;
+  }
+  // dots
+  let dots='';
+  for(let i=0;i<12;i++){
+    for(let j=0;j<9;j++){
+      const d = Math.hypot(i-6,j-4);
+      const r = Math.max(1.4, 6-d*0.9);
+      dots += `<circle cx="${14+i*26}" cy="${14+j*28}" r="${r}" fill="${d<1.6?c:'#0a0a0a'}" opacity="${d<1.6?1:0.5-d*0.04}"/>`;
+    }
+  }
+  return `<svg viewBox="0 0 320 280" preserveAspectRatio="xMidYMid slice">
+    <rect width="320" height="280" fill="#ecebe6"/>${dots}</svg>`;
+}
+
+/* ============================================================
+   BUILD PROJECT LIST
+   ============================================================ */
+const projectList = document.getElementById('projectList');
+PROJECTS.forEach((p,i)=>{
+  const row = document.createElement('article');
+  row.className = 'project reveal';
+  row.dataset.id = p.id;
+  row.innerHTML = `
+    <div class="project__top">
+      <div>
+        <div class="project__meta">
+          <span class="project__index">${p.index}</span>
+          <h3 class="project__title">${p.title}</h3>
+        </div>
+        <div class="project__cat">${p.category}</div>
+      </div>
+      <span class="project__year">${p.year}</span>
+    </div>
+    <p class="project__desc">${p.desc}</p>
+    <div class="project__cta">View case study <span class="arrow">↗</span></div>
+    <div class="project__visual">
+      <div class="project__visual-inner art">${artSVG(p.art, p.accent)}</div>
+    </div>
+  `;
+  row.addEventListener('click', ()=>openCase(p.id));
+  row.addEventListener('mouseenter', ()=>{
+    document.getElementById('cursorRing').classList.add('is-view');
+    document.getElementById('cursorLabel').classList.add('show');
+  });
+  row.addEventListener('mouseleave', ()=>{
+    document.getElementById('cursorRing').classList.remove('is-view');
+    document.getElementById('cursorLabel').classList.remove('show');
+  });
+  projectList.appendChild(row);
+});
+
+/* ============================================================
+   BUILD PROCESS
+   ============================================================ */
+const processList = document.getElementById('processList');
+PROCESS_STEPS.forEach(s=>{
+  const item = document.createElement('div');
+  item.className = 'pstep reveal';
+  item.innerHTML = `
+    <span class="pstep__num">${s.n}</span>
+    <span class="pstep__title">${s.t}</span>
+    <span class="pstep__plus"></span>
+    <div class="pstep__detail"><p>${s.d}</p></div>
+  `;
+  const detail = item.querySelector('.pstep__detail');
+  item.addEventListener('click', ()=>{
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.pstep.open').forEach(o=>{
+      o.classList.remove('open'); o.querySelector('.pstep__detail').style.height='0px';
+    });
+    if(!isOpen){
+      item.classList.add('open');
+      detail.style.height = detail.scrollHeight+'px';
+    }
+  });
+  processList.appendChild(item);
+});
+
+/* ============================================================
+   BUILD SKILLS
+   ============================================================ */
+const skillsGrid = document.getElementById('skillsGrid');
+SKILLS.forEach(s=>{
+  const el = document.createElement('div');
+  el.className = 'skill';
+  el.innerHTML = `<span>${s.t}</span>`;
+  skillsGrid.appendChild(el);
+});
+
+/* ============================================================
+   ABOUT PORTRAIT PLACEHOLDER
+   ============================================================ */
+document.getElementById('aboutPortrait').innerHTML = `<div class="art" style="height:100%">${
+  `<svg viewBox="0 0 320 400" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+    <rect width="320" height="400" fill="#ecebe6"/>
+    <circle cx="160" cy="150" r="60" fill="#0a0a0a" opacity="0.85"/>
+    <rect x="70" y="230" width="180" height="140" rx="90" fill="#0a0a0a" opacity="0.85"/>
+    <circle cx="250" cy="70" r="6" fill="#2c3bff"/>
+  </svg>`
+}</div>`;
+
+/* ============================================================
+   CASE STUDY OVERLAY
+   ============================================================ */
+const SECTION_ORDER = [
+  ['overview','Overview'],['problem','Problem'],['research','Research'],
+  ['flow','User Flow'],['wireframes','Wireframes'],['visual','Visual Design'],
+  ['prototype','Prototype'],['outcome','Outcome']
+];
+
+const caseOverlay = document.getElementById('caseOverlay');
+const caseContent = document.getElementById('caseContent');
+const caseNav = document.getElementById('caseNav');
+
+function openCase(id){
+  const p = PROJECTS.find(x=>x.id===id);
+  if(!p) return;
+
+  let navHTML = '';
+  let blocksHTML = '';
+  SECTION_ORDER.forEach(([key,label],i)=>{
+    const num = String(i+1).padStart(2,'0');
+    navHTML += `<a href="#cs-${key}" data-key="${key}">${num} — ${label}</a>`;
+    blocksHTML += `
+      <div class="case__block" id="cs-${key}">
+        <div class="wrap">
+          <div class="case__block-grid">
+            <span class="case__block-num">${num}</span>
+            <div>
+              <h3>${label}</h3>
+              <p>${p.sections[key]}</p>
+              ${(key==='wireframes'||key==='visual'||key==='prototype') ? `<div class="case__shot art">${artSVG(p.art,p.accent)}</div>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  caseNav.innerHTML = navHTML;
+  caseContent.innerHTML = `
+    <div class="case__hero wrap">
+      <div class="case__eyebrow">${p.category} · ${p.year}</div>
+      <div class="reveal-mask in"><h1 class="case__title">${p.title}</h1></div>
+      <div class="case__tags">
+        <span class="case__tag">${p.category.split(' · ')[0]}</span>
+        <span class="case__tag">${p.category.split(' · ')[1]||p.year}</span>
+        <span class="case__tag">${p.year}</span>
+      </div>
+      <div class="case__cover art">${artSVG(p.art,p.accent)}</div>
+    </div>
+    ${blocksHTML}
+    <div class="case__foot wrap">
+      <p style="color:var(--gray); margin-bottom:18px;">Next project</p>
+      <a href="#" id="caseNextBtn">See next case study <span class="arrow">↗</span></a>
+    </div>
+  `;
+
+  const idx = PROJECTS.findIndex(x=>x.id===id);
+  const nextP = PROJECTS[(idx+1)%PROJECTS.length];
+  document.getElementById('caseNextBtn').addEventListener('click', (e)=>{
+    e.preventDefault();
+    openCase(nextP.id);
+    caseOverlay.scrollTo({top:0});
+  });
+
+  caseOverlay.classList.add('open');
+  document.body.classList.add('case-open');
+  caseOverlay.scrollTop = 0;
+  history.pushState({case:id}, '', '#'+id);
+}
+
+function closeCase(){
+  caseOverlay.classList.remove('open');
+  document.body.classList.remove('case-open');
+  history.pushState({}, '', '#work');
+}
+
+document.getElementById('caseClose').addEventListener('click', closeCase);
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && caseOverlay.classList.contains('open')) closeCase(); });
+
+caseOverlay.addEventListener('scroll', ()=>{
+  const blocks = SECTION_ORDER.map(([key])=>document.getElementById('cs-'+key)).filter(Boolean);
+  let current = blocks[0];
+  const barOffset = 140;
+  blocks.forEach(b=>{ if(b.getBoundingClientRect().top - barOffset <= 0) current = b; });
+  document.querySelectorAll('.case__nav a').forEach(a=>{
+    a.classList.toggle('active', current && a.dataset.key===current.id.replace('cs-',''));
+  });
+});
+
+caseNav.addEventListener('click', (e)=>{
+  const a = e.target.closest('a');
+  if(!a) return;
+  e.preventDefault();
+  const target = document.getElementById(a.getAttribute('href').slice(1));
+  if(target) caseOverlay.scrollTo({top: target.offsetTop - 90, behavior:'smooth'});
+});
+
+/* ============================================================
+   PRELOADER
+   ============================================================ */
+window.addEventListener('load', ()=>{
+  const bar = document.getElementById('preloaderBar');
+  const count = document.getElementById('preloaderCount');
+  const pre = document.getElementById('preloader');
+  let p = 0;
+  const t = setInterval(()=>{
+    p += Math.random()*18+8;
+    if(p>=100){ p=100; clearInterval(t); }
+    bar.style.width = p+'%';
+    count.textContent = Math.round(p)+'%';
+    if(p===100){
+      setTimeout(()=>{
+        pre.classList.add('done');
+        document.body.classList.remove('is-loading');
+        document.querySelectorAll('.reveal, .reveal-mask').forEach(el=>{
+          const r = el.getBoundingClientRect();
+          if(r.top < window.innerHeight*0.92) { el.classList.add('in'); }
+        });
+      }, 250);
+    }
+  }, 90);
+});
+// fallback in case load event is slow/blocked
+setTimeout(()=>{
+  document.body.classList.remove('is-loading');
+  document.getElementById('preloader').classList.add('done');
+}, 3500);
+
+/* ============================================================
+   NAV SCROLL STATE + MOBILE MENU
+   ============================================================ */
+const navEl = document.getElementById('nav');
+window.addEventListener('scroll', ()=>{
+  navEl.classList.toggle('scrolled', window.scrollY > 40);
+}, {passive:true});
+
+const burger = document.getElementById('burger');
+const mobileMenu = document.getElementById('mobileMenu');
+burger.addEventListener('click', ()=>{
+  const open = mobileMenu.classList.toggle('open');
+  burger.classList.toggle('open', open);
+  burger.setAttribute('aria-expanded', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+});
+mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>{
+  mobileMenu.classList.remove('open'); burger.classList.remove('open');
+  document.body.style.overflow = '';
+}));
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+}, {threshold:0.14});
+document.querySelectorAll('.reveal, .reveal-mask').forEach(el=>io.observe(el));
+
+/* ============================================================
+   CUSTOM CURSOR + MAGNETIC + HERO PARALLAX
+   All driven by ONE requestAnimationFrame loop. mousemove handlers
+   only record a coordinate (cheap) — no style writes, no layout
+   reads happen inside them, which is what was causing the stutter/
+   "stuck" feeling (multiple listeners fighting + forced reflows).
+   ============================================================ */
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+const cursorLabel = document.getElementById('cursorLabel');
+const heroVisual = document.getElementById('heroVisual');
+
+let mx = window.innerWidth/2, my = window.innerHeight/2;
+let dx = mx, dy = my, rx = mx, ry = my;
+let hvx = 0, hvy = 0;
+
+window.addEventListener('mousemove', (e)=>{ mx = e.clientX; my = e.clientY; }, {passive:true});
+
+function frameLoop(){
+  // dot: quick, tight follow
+  dx += (mx-dx)*0.55; dy += (my-dy)*0.55;
+  dot.style.transform = `translate3d(${dx}px,${dy}px,0) translate(-50%,-50%)`;
+
+  // ring + label: slower trailing follow, same easing so they never split apart
+  rx += (mx-rx)*0.18; ry += (my-ry)*0.18;
+  const ringT = `translate3d(${rx}px,${ry}px,0) translate(-50%,-50%)`;
+  ring.style.transform = ringT;
+  cursorLabel.style.transform = ringT;
+
+  // hero visual: subtle smoothed parallax, no per-event layout work
+  if(heroVisual){
+    const tx = (mx / window.innerWidth - 0.5) * 14;
+    const ty = (my / window.innerHeight - 0.5) * 14;
+    hvx += (tx-hvx)*0.08; hvy += (ty-hvy)*0.08;
+    heroVisual.style.transform = `translate3d(${hvx}px,${hvy}px,0)`;
+  }
+
+  requestAnimationFrame(frameLoop);
+}
+requestAnimationFrame(frameLoop);
+
+document.querySelectorAll('a, button, .project').forEach(el=>{
+  el.addEventListener('mouseenter', ()=>{ ring.style.width='52px'; ring.style.height='52px'; });
+  el.addEventListener('mouseleave', ()=>{ if(!ring.classList.contains('is-view')){ ring.style.width='36px'; ring.style.height='36px'; } });
+});
+
+/* ============================================================
+   MAGNETIC BUTTONS
+   Bounding rect is cached on mouseenter instead of read on every
+   mousemove — reading layout mid-gesture was the other source of
+   jank (a forced reflow interleaved with the transform writes above).
+   ============================================================ */
+document.querySelectorAll('.magnetic').forEach(el=>{
+  let rect = null;
+  el.addEventListener('mouseenter', ()=>{ rect = el.getBoundingClientRect(); });
+  el.addEventListener('mousemove', (e)=>{
+    if(!rect) rect = el.getBoundingClientRect();
+    const relX = e.clientX - rect.left - rect.width/2;
+    const relY = e.clientY - rect.top - rect.height/2;
+    el.style.transform = `translate3d(${relX*0.24}px, ${relY*0.32}px, 0)`;
+  });
+  el.addEventListener('mouseleave', ()=>{ el.style.transform = 'translate(0,0)'; rect = null; });
+});
+
+/* ============================================================
+   HERO VISUAL — animated blueprint grid (parallax handled in frameLoop above)
+   ============================================================ */
+if(heroVisual){
+  heroVisual.innerHTML = `
+  <svg viewBox="0 0 360 360" width="100%" height="100%">
+    <g stroke="#0a0a0a" stroke-opacity="0.16">
+      ${[0,1,2,3,4,5,6].map(i=>`<line x1="${i*60}" y1="0" x2="${i*60}" y2="360"/>`).join('')}
+      ${[0,1,2,3,4,5,6].map(i=>`<line x1="0" y1="${i*60}" x2="360" y2="${i*60}"/>`).join('')}
+    </g>
+    <circle cx="120" cy="180" r="5" fill="#2c3bff">
+      <animateMotion dur="7s" repeatCount="indefinite"
+        path="M0,0 L120,-60 L180,60 L60,120 L0,0" />
+    </circle>
+    <rect x="200" y="80" width="90" height="90" fill="none" stroke="#0a0a0a" stroke-width="1.4" opacity="0.55">
+      <animateTransform attributeName="transform" type="rotate" from="0 245 125" to="360 245 125" dur="26s" repeatCount="indefinite"/>
+    </rect>
+    <circle cx="245" cy="125" r="4" fill="#0a0a0a"/>
+  </svg>`;
+}
+
+
+/* ============================================================
+   CONTACT FORM (client-side demo)
+   ============================================================ */
+document.getElementById('contactForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  document.getElementById('formSuccess').classList.add('show');
+  e.target.reset();
+});
+
+/* deep-link support: open case study if URL hash matches a project id on load */
+window.addEventListener('DOMContentLoaded', ()=>{
+  const hash = location.hash.replace('#','');
+  if(PROJECTS.some(p=>p.id===hash)) openCase(hash);
+});
+</script>
+</body>
+</html>
